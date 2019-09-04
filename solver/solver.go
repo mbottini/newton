@@ -2,6 +2,7 @@ package solver
 
 import (
 	"errors"
+	"fmt"
 	"math/cmplx"
 
 	"github.com/mbottini/newton/polynomial"
@@ -28,12 +29,14 @@ func fixedPoint(f func(complex128) complex128,
 }
 
 // NewtonFunc takes a Polynomial and returns a function that applies Newton's
-// Method: x_1 = x_0 - f(x) / f'(x)
-func newtonFunc(p polynomial.Polynomial) func(complex128) complex128 {
+// Method: x_1 = x_0 - multiplicity * f(x) / f'(x).
+// Multiplicity is used when the polynomial has multiple instances of the same
+// root.
+func newtonFunc(p polynomial.Polynomial, multiplicity int) func(complex128) complex128 {
 	return func(x complex128) complex128 {
 		f := p.Eval()
 		g := p.Derivative().Eval()
-		return x - f(x)/g(x)
+		return x - complex(float64(multiplicity), 0)*f(x)/g(x)
 	}
 }
 
@@ -44,7 +47,6 @@ func SolvePolynomial(p polynomial.Polynomial,
 	guess complex128,
 	eps float64,
 	maxIters int) (complex128, error) {
-	f := newtonFunc(p)
 	// Stupid edge case - what if the guess is right on the solution, but the
 	// solution's derivative is 0?
 	deriv := p.Derivative().Eval()
@@ -53,5 +55,15 @@ func SolvePolynomial(p polynomial.Polynomial,
 			return guess, nil
 		}
 	}
-	return fixedPoint(f, guess, eps, maxIters)
+	// Even iterating through
+	possibleMultiplicity := p.Degree()
+	fmt.Printf("degree = %d\n", p.Degree())
+	for i := 1; i <= possibleMultiplicity; i++ {
+		f := newtonFunc(p, i)
+		result, err := fixedPoint(f, guess, eps, maxIters)
+		if err == nil {
+			return result, err
+		}
+	}
+	return 0, errors.New("solver: polynomial did not converge")
 }
