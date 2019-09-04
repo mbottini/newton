@@ -1,6 +1,9 @@
 package polynomial
 
-import "fmt"
+import (
+	"fmt"
+	"math/cmplx"
+)
 
 // Polynomial is just a list of coefficients. The 0th coefficient is the
 // constant term, the 1st coefficient is the linear term, etc.
@@ -115,4 +118,24 @@ func (p Polynomial) Div(other Polynomial) (Polynomial, Polynomial) {
 		mutable = mutable.Sub(subtractand)
 	}
 	return result, mutable
+}
+
+// Derivative uses the power rule to return the derivative of the polynomial.
+func (p Polynomial) Derivative() Polynomial {
+	var result Polynomial
+	for power, coefficient := range p[1:] {
+		result = append(result, coefficient*complex(float64(power), 0))
+	}
+	return result
+}
+
+// Eval produces a function from the coefficients in the terms.
+func (p Polynomial) Eval() func(complex128) complex128 {
+	return func(x complex128) complex128 {
+		var result complex128
+		for power, coefficient := range p {
+			result += coefficient * cmplx.Pow(x, complex(float64(power), 0))
+		}
+		return result
+	}
 }
