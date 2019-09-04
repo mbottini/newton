@@ -88,7 +88,7 @@ func (p Polynomial) MulScalar(scalar complex128) Polynomial {
 
 // Mul multiplies two Polynomials together and returns a Polynomial.
 func (p Polynomial) Mul(other Polynomial) Polynomial {
-	result := make(Polynomial, (len(p)-1)*(len(other)-1))
+	result := make(Polynomial, p.Degree()+other.Degree()+1)
 	for i, thisCoef := range p {
 		for j, otherCoef := range other {
 			result[i+j] += thisCoef * otherCoef
@@ -111,7 +111,7 @@ func (p Polynomial) Div(other Polynomial) (Polynomial, Polynomial) {
 		result[power] = factor
 		subtractand := make(Polynomial, power+1)
 		subtractand[power] = factor
-		subtractand = mutable.Mul(subtractand)
+		subtractand = other.Mul(subtractand)
 		mutable = mutable.Sub(subtractand)
 	}
 	return result, mutable
