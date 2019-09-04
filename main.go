@@ -20,17 +20,20 @@ func main() {
 	fmt.Println(p.Derivative())
 
 	for p.Degree() > 0 {
-		fmt.Printf("Input a guess. ")
-		fmt.Scanf("%v", &guess)
 		var err error
-		for p.Degree() > 0 && err == nil {
-			result, err := solver.SolvePolynomial(p, guess, eps, maxIters)
-			if err == nil {
-				fmt.Printf("Found root at %v\n", result)
-				results = append(results, result)
-				p, _ = p.DivideByTerm(result)
-			} else {
-				fmt.Println(err)
+		var result complex128
+		for p.Degree() > 0 {
+			fmt.Printf("Input a guess. ")
+			fmt.Scanf("%g", &guess)
+			for err == nil && p.Degree() > 0 {
+				result, err = solver.SolvePolynomial(p, guess, eps, maxIters)
+				if err == nil {
+					fmt.Printf("Found root at %v\n", result)
+					results = append(results, result)
+					p, _ = p.DivideByTerm(result)
+				} else {
+					fmt.Println("Polynomial did not converge with that guess.")
+				}
 			}
 		}
 	}
