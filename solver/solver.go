@@ -45,5 +45,13 @@ func SolvePolynomial(p polynomial.Polynomial,
 	eps float64,
 	maxIters int) (complex128, error) {
 	f := newtonFunc(p)
+	// Stupid edge case - what if the guess is right on the solution, but the
+	// solution's derivative is 0?
+	deriv := p.Derivative().Eval()
+	if deriv(guess) == 0 {
+		if p.Eval()(guess) == 0 {
+			return guess, nil
+		}
+	}
 	return fixedPoint(f, guess, eps, maxIters)
 }
