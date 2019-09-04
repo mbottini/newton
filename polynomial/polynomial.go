@@ -120,11 +120,18 @@ func (p Polynomial) Div(other Polynomial) (Polynomial, Polynomial) {
 	return result, mutable
 }
 
+// DivideByTerm divides the Polynomial by a linear term.
+func (p Polynomial) DivideByTerm(term complex128) (Polynomial, Polynomial) {
+	var divisor Polynomial
+	divisor = append(divisor, -term, complex(float64(1), 0))
+	return p.Div(divisor)
+}
+
 // Derivative uses the power rule to return the derivative of the polynomial.
 func (p Polynomial) Derivative() Polynomial {
 	var result Polynomial
 	for power, coefficient := range p[1:] {
-		result = append(result, coefficient*complex(float64(power), 0))
+		result = append(result, coefficient*complex(float64(power+1), 0))
 	}
 	return result
 }
